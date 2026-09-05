@@ -1,0 +1,12 @@
+#ignore virtual environment files
+.venv
+.env
+test*
+#ignore python cache
+__pycache__/
+*.pyc
+.python-version
+
+#ignore uv files
+uv.lock
+pyproject.toml
