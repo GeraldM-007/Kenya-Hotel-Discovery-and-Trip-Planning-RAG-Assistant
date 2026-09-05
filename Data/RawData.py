@@ -21,6 +21,7 @@ def kws_scrape(KWS_URL, pages, headers):
         if not b:
             continue
         
+        #append the name of the mentioned National park and a link to it on the kws website
         experiences.append(
             {
                 "title": b.get_text(" ", strip=True),
@@ -28,7 +29,7 @@ def kws_scrape(KWS_URL, pages, headers):
             }
         )
     
-    all_data=[]
+    kws_all_data=[]
     
     for experience in experiences:
         
@@ -48,9 +49,10 @@ def kws_scrape(KWS_URL, pages, headers):
                 "park_link": heading["href"]
             })
             
-            all_data.append({
+            kws_all_data.append({
                 "experience": title,
                 "parks": parks
             })
     
+    return kws_all_data
 
