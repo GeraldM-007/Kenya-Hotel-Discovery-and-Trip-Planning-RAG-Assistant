@@ -1,6 +1,6 @@
 import requests 
 from bs4 import BeautifulSoup
-from config import MAGICAL_KENYA_URL, headers
+from app.config import MAGICAL_KENYA_URL, headers
 
 url = MAGICAL_KENYA_URL
 
