@@ -7,7 +7,7 @@ from app.config import HEADERS, DESTINATIONS
 BASE_DIR = Path(__file__).resolve().parents[2]
 
 #define where the downloaded raw html files will be stored
-RAW_HTML_DIR = BASE_DIR / "TravelAfricaRAGProject" / "Data" / "raw2"
+RAW_HTML_DIR = BASE_DIR / "TravelAfricaRAGProject" / "Data" / "raw"
 
 #make the request and download the html page
 def download_page(url: str):
