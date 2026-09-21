@@ -39,18 +39,18 @@ def save_html(slug: str, html: str):
     #return the location of the saved file
     return output_path
 
-#download and scrape all destination pages
-def scrape_destinations():
+#download and save all destination pages
+def download_destinations():
     
-    #counting the total number of destinations to scrape
-    print(f"Destinations to scrape: {len(DESTINATIONS)}")
+    #counting the total number of destinations to download
+    print(f"Destinations to download: {len(DESTINATIONS)}")
     
     for destination in DESTINATIONS:
         name = destination["name"]
         slug = destination["slug"]
         url = destination["url"]
         
-        print(f"Scraping: {name}")
+        print(f"Downloading: {name}")
         print(f"URL: {url}")
         
         try:
@@ -71,4 +71,4 @@ def scrape_destinations():
 
 
 if __name__ == "__main__":
-    scrape_destinations()
+    download_destinations()
