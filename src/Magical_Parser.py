@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 RAW_DIR = BASE_DIR / "TravelAfricaRAGProject" / "Data" / "raw"
 PARSED_DIR = BASE_DIR / "TravelAfricaRAGProject" / "tests" / "data" /"processed" / "json"
 
-#make dir if not exist
+#make dir if not 
 BASE_DIR.mkdir(parents = True, exist_ok = True)
 RAW_DIR.mkdir(parents = True, exist_ok = True)
 PARSED_DIR.mkdir(parents = True, exist_ok = True)
@@ -22,12 +22,10 @@ def parse_html(file_path: Path):
     #load the entire file into a python string, decoding in utf-8 while ignoring invalid utf-8 characters
     html = file_path.read_text(encoding = "utf-8", errors = "ignore")
     
-    #Beautifulsoup turns the raw html string into a navigatable html tree
-    #lxml is the html parser in use
     soup = BeautifulSoup(html, "lxml")
         
     #Extract metadata from the read text
-    title = None #safe default incase html doesn't contain a title
+    title = None 
     
     if soup.title:
         title = soup.title.get_text(strip = True)
@@ -50,8 +48,8 @@ def parse_html(file_path: Path):
     
     #Remove unwanted content
     for tag in content.find_all(["script", "style", "noscript", "svg", "iframe", "nav", "footer"]):
-        tag.decompose()   #decompose completely removes a HTML element and its contents from BeautifulSoup tree
-
+        tag.decompose()  
+    
     #Extract useful sections
     sections = []
     
@@ -60,7 +58,6 @@ def parse_html(file_path: Path):
     
     for element in content.find_all(["h1", "h2", "h3", "h4", "p", "li"]):
         # Extract text from the current HTML element.
-        # " " puts spaces between nested elements.
         text = element.get_text(" ", strip=True)
         
         # Ignore empty elements
@@ -69,10 +66,10 @@ def parse_html(file_path: Path):
         
         # If we encounter a heading, a new section is starting
         if element.name in ["h1", "h2", "h3", "h4"]:
-            # Save the previous section first
-            if current_text:
+            # Save the previous heading even if it has no body text
+            if current_heading is not None: 
                 sections.append({"heading": current_heading, "text": "\n".join(current_text)})
-        
+            
             # Start the new section
             current_heading = text
             current_text = []
@@ -80,7 +77,11 @@ def parse_html(file_path: Path):
         else:
             # <p> and <li> belong to the current section
             current_text.append(text)
-    
+            
+        #save the final section
+        if current_heading is not None or current_text:
+            sections.append({'heading': current_heading, 'text': '\n'.join(current_text)})
+        
     
     #Full cleaned text from the document
     full_text = "\n\n".join(section["text"] for section in sections)
