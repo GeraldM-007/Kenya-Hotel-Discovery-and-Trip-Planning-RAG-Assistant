@@ -1,5 +1,5 @@
 import pandas as pd
-from Data.KWS import kws_scrape
+from src.KWS.KWS import kws_scrape
 
 def kws_clean_data(kws_all_data):
     
