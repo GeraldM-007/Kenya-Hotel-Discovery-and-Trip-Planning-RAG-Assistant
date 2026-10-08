@@ -3,14 +3,6 @@ from bs4 import BeautifulSoup
 import json
 import hashlib
 
-BASE_DIR = Path(__file__).resolve().parents[2]
-RAW_DIR = BASE_DIR / "TravelAfricaRAGProject" / "Data" / "raw"
-PARSED_DIR = BASE_DIR / "TravelAfricaRAGProject" / "Data" /"processed" / "json"
-
-#make dir if not exist
-BASE_DIR.mkdir(parents = True, exist_ok = True)
-RAW_DIR.mkdir(parents = True, exist_ok = True)
-PARSED_DIR.mkdir(parents = True, exist_ok = True)
 
 #create a deterministic file ID from the filename using sha256 algorithm
 def create_document_id(filename: str):
@@ -92,24 +84,4 @@ def clean_content(content):
         loop_item.decompose()
         
     return content
-
-
-#Move this to main.py file. It is only here for testing purposes only
-def main():
-    
-    for file_path in RAW_DIR.glob("*.html"):
-        
-        print(f"Parsing: {file_path}")
-        
-        document = parse_html(file_path)
-        
-        output_file = (PARSED_DIR / f"{file_path.stem}.json")
-        
-        with output_file.open("w", encoding = "utf-8") as f:
-            json.dump(document, f, ensure_ascii = False, indent = 2)
-            
-        print(f"Saved: {output_file}")
-
-if __name__ == "__main__":
-    main()
     
