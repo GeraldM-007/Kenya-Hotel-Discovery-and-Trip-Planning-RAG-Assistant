@@ -1,11 +1,11 @@
 import requests 
 from bs4 import BeautifulSoup
-from app.config import KWS_URL, pages, headers
+from app.config import KWS_URL, HEADERS
 
 #function to scrap data from kenya wildlife service website
 def kws_scrape(KWS_URL, pages, headers):
         
-    html_response = requests.get(f"{KWS_URL}", headers=headers, verify=False)
+    html_response = requests.get(f"{KWS_URL}", headers=HEADERS, verify=False)
     
     #convert the response from raw html into python objects
     soup = BeautifulSoup(html_response.text, "html.parser")
@@ -36,7 +36,7 @@ def kws_scrape(KWS_URL, pages, headers):
         title = experience["title"]
         url = experience["experience_link"]
         
-        response = requests.get(url, headers=headers, verify=False)
+        response = requests.get(url, headers=HEADERS, verify=False)
         
         soup = BeautifulSoup(response.text, "html.parser")
         
