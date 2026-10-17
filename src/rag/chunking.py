@@ -204,3 +204,28 @@ def save_chunks(chunks, output_path: Path):
         for chunk in chunks:
             file.write(json.dumps(chunk, ensure_ascii=False) + "\n")
 
+#Main executes the entire code
+def main():
+    
+    BASE_DIR = Path(__file__).resolve().parents[1]
+    JSON_DIR = BASE_DIR / "Data" / "processed" / "json"
+    OUTPUT_PATH = BASE_DIR / "tests" / "Data" / "processed" / "chunks" / "chunks.jsonl"
+    
+    documents = load_documents(JSON_DIR)
+    
+    all_chunks = []
+    
+    for document in documents:
+        chunks = create_document_chunks(document, chunk_size=300, overlap = 50)
+                
+        all_chunks.extend(chunks)
+    
+    save_chunks(all_chunks, OUTPUT_PATH)
+    
+    print(f"Documents processed: {len(documents)}")
+    print(f"Chunks created: {len(all_chunks)}")
+    print(f"Saved to: {OUTPUT_PATH}")
+    
+if __name__ == "__main__":
+    main()
+    
