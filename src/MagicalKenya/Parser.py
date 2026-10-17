@@ -82,6 +82,9 @@ def clean_content(content):
     
     for loop_item in content.find_all(attrs={"data-elementor-type": "loop-item"}):
         loop_item.decompose()
+    
+    for element in content.find_all(attrs={"data-widget_type": "icon-box.default"}):
+        element.decompose()
         
     return content
     
