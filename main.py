@@ -5,19 +5,26 @@ import pandas as pd
 from pathlib import Path
 import json
 from src.MagicalKenya.Parser import parse_html
+from src.rag.chunking import load_documents, create_document_chunks, save_chunks
 
-
+#Base DIR for all files
 BASE_DIR = Path(__file__).resolve().parent
+
+#Directories used in parsing
 RAW_DIR = BASE_DIR / "Data" / "raw"
 PARSED_DIR = BASE_DIR / "Data" /"processed" / "json"
-
 #make dir if not exist
 BASE_DIR.mkdir(parents = True, exist_ok = True)
 RAW_DIR.mkdir(parents = True, exist_ok = True)
 PARSED_DIR.mkdir(parents = True, exist_ok = True)
 
+#Directories used in chunking
+JSON_DIR = BASE_DIR / "Data" / "processed" / "json"
+OUTPUT_PATH = BASE_DIR / "tests" / "Data" / "processed" / "chunks" / "chunks.jsonl"
+
 def main():
     
+    #Parsing downloaded html files into json
     for file_path in RAW_DIR.glob("*.html"):
         
         print(f"Parsing: {file_path}")
@@ -29,7 +36,23 @@ def main():
         with output_file.open("w", encoding = "utf-8") as f:
             json.dump(document, f, ensure_ascii = False, indent = 2)
             
-        print(f"Saved: {output_file}")    
+        print(f"Saved: {output_file}")  
+        
+    #Chunking parsed json files into word and semantic based searching 
+    documents = load_documents(JSON_DIR)
+    
+    all_chunks = []
+    
+    for document in documents:
+        chunks = create_document_chunks(document, chunk_size=300, overlap=50)
+        
+        all_chunks.extend(chunks)
+    
+    save_chunks(all_chunks, OUTPUT_PATH)
+    
+    print(f"Documents processed: {len(documents)}")
+    print(f"Chunks created: {len(all_chunks)}")
+    print(f"saved to: {OUTPUT_PATH}")
     
 if __name__ == "__main__":
     main()
