@@ -6,6 +6,7 @@ from pathlib import Path
 import json
 from src.MagicalKenya.Parser import parse_html
 from src.rag.chunking import load_documents, create_document_chunks, save_chunks
+from src.rag.vector_store import load_chunks, SentenceTransformer, create_collection, store_vectors
 
 #Base DIR for all files
 BASE_DIR = Path(__file__).resolve().parent
@@ -20,7 +21,14 @@ PARSED_DIR.mkdir(parents = True, exist_ok = True)
 
 #Directories used in chunking
 JSON_DIR = BASE_DIR / "Data" / "processed" / "json"
-OUTPUT_PATH = BASE_DIR / "tests" / "Data" / "processed" / "chunks" / "chunks.jsonl"
+OUTPUT_PATH = BASE_DIR / "Data" / "processed" / "chunks" / "chunks.jsonl"
+
+#Directories and variables used on vectore_store
+CHUNKS_PATH = BASE_DIR/ "Data" / "processed" / "chunks" / "chunks.jsonl" 
+VECTOR_DB_DIR = BASE_DIR / "Data" / "vector-store"
+
+COLLECTION_NAME = "travel_africa_kenya_destinations"
+EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 def main():
     
@@ -53,6 +61,20 @@ def main():
     print(f"Documents processed: {len(documents)}")
     print(f"Chunks created: {len(all_chunks)}")
     print(f"saved to: {OUTPUT_PATH}")
+    
+    #STORING CREATED CHUNKS INTO A VECTORDB AND DEFINING HOW TO SEARCH THE DATABASE
+    chunks = load_chunks(CHUNKS_PATH)
+    if not chunks:
+        print(f"No chunks found in {CHUNKS_PATH}: Nothing to store")
+        return
+    
+    model = SentenceTransformer(EMBEDDING_MODEL)
+    collection = create_collection(VECTOR_DB_DIR, COLLECTION_NAME)
+    count = store_vectors(chunks, collection, model)
+    
+    print(f"chunks processed: {count}")
+    print(f"Vectors in collection: {collection.count()}")
+    print(f"ChromaDB location {VECTOR_DB_DIR}")
     
 if __name__ == "__main__":
     main()
