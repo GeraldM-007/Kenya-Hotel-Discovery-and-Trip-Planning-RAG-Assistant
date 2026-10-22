@@ -1,12 +1,13 @@
-from app.config import KWS_URL, HEADERS
-from src.KWS.KWS import kws_scrape
-from src.KWS.Cleaned_kws_Data import kws_clean_data
-import pandas as pd
 from pathlib import Path
 import json
 from src.MagicalKenya.Parser import parse_html
 from src.rag.chunking import load_documents, create_document_chunks, save_chunks
 from src.rag.vector_store import load_chunks, SentenceTransformer, create_collection, store_vectors
+import os
+from dotenv import load_dotenv
+from groq import Groq
+from src.rag.rag import answer_question
+
 
 #Base DIR for all files
 BASE_DIR = Path(__file__).resolve().parent
@@ -23,12 +24,13 @@ PARSED_DIR.mkdir(parents = True, exist_ok = True)
 JSON_DIR = BASE_DIR / "Data" / "processed" / "json"
 OUTPUT_PATH = BASE_DIR / "Data" / "processed" / "chunks" / "chunks.jsonl"
 
-#Directories and variables used on vectore_store
+# Used on vectore_store
 CHUNKS_PATH = BASE_DIR/ "Data" / "processed" / "chunks" / "chunks.jsonl" 
 VECTOR_DB_DIR = BASE_DIR / "Data" / "vector-store"
 
 COLLECTION_NAME = "travel_africa_kenya_destinations"
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+
 
 def main():
     
@@ -75,6 +77,59 @@ def main():
     print(f"chunks processed: {count}")
     print(f"Vectors in collection: {collection.count()}")
     print(f"ChromaDB location {VECTOR_DB_DIR}")
+    
+    # QUERYING THE VECTORDB AND PASSING THE OUTPUT TO AN LLM VIA PROMPT
+
+    # Load environment variables
+    load_dotenv(BASE_DIR / ".env")
+
+    api_key = os.getenv("GROQ_API_KEY")
+
+    if not api_key:
+        raise ValueError("GROQ_API_KEY not found")
+
+    # Load the embedding model
+    embedding_model = SentenceTransformer(EMBEDDING_MODEL)
+
+    # Connect to the existing ChromaDB collection
+    collection = create_collection(VECTOR_DB_DIR, COLLECTION_NAME)
+    
+    #if the collection is empty and there is nothing to retrieve, the program stops
+    if collection.count() == 0:
+        print("Vector database is empty!!")
+        return
+
+    # Initialize Groq client
+    groq_client = Groq(api_key=api_key)
+
+    print("TravelAfrica RAG Assistant")
+    print("Type 'exit' to quit.")
+
+    while True:
+
+        question = input("\nQuestion: ").strip()
+
+        if question.lower() in {"exit", "quit"}:
+            break
+
+        if not question:
+            continue
+
+        result = answer_question(question=question, collection=collection, embedding_model=embedding_model, groq_client=groq_client, n_results=5)
+
+        print("\nAnswer:")
+        print(result["answer"])
+
+        print("\nSources:")
+
+        for source in result["sources"]:
+            print(
+                f"{source['reference']} "
+                f"{source['destination']} - "
+                f"{source['section']}"
+            )
+            print(f"URL: {source['source_url']}")
+
     
 if __name__ == "__main__":
     main()
